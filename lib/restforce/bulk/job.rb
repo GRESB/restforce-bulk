@@ -7,7 +7,8 @@ module Restforce
         csv: 'CSV',
         xml: 'XML',
         zip_csv: 'ZIP_CSV',
-        zip_xml: 'ZIP_XML'
+        zip_xml: 'ZIP_XML',
+        json: 'JSON'
       }
 
       class << self

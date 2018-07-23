@@ -19,7 +19,7 @@ module Restforce
       protected
 
       def results_parser_for(body)
-        body.is_a?(CSV::Table) ? Restforce::Bulk::Parser::Csv : Restforce::Bulk::Parser::Xml
+        body.is_a?(CSV::Table) ? Restforce::Bulk::Parser::Csv : Restforce::Bulk::Parser::Json
       end
     end
   end

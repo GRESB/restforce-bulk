@@ -4,12 +4,12 @@ module Restforce
       include Restforce::Bulk::Attributes
 
       class << self
-        def create(job_id, data, operation, content_type=:xml)
+        def create(job_id, data, operation, content_type=:json)
           builder  = builder_class_for(content_type).new(operation)
 
           response = Restforce::Bulk.client.perform_request(:post, "job/#{job_id}/batch", builder.transform(data, operation, content_type), content_type)
 
-          new(response.body.batchInfo)
+          new(response.body)
         end
 
         def find(job_id, id)
@@ -50,22 +50,22 @@ module Restforce
       def refresh
         response = Restforce::Bulk.client.perform_request(:get, "job/#{job_id}/batch/#{id}")
 
-        assign_attributes(response.body.batchInfo)
+        assign_attributes(response.body)
       end
 
       def results
         response = Restforce::Bulk.client.perform_request(:get, "job/#{job_id}/batch/#{id}/result")
         parser   = results_parser_for(response.body).new
 
-        parser.results_on(response.body).map do |result|
-          Restforce::Bulk::Result.new({job_id: job_id, batch_id: id}.merge(result))
+        parser.results_on(response.body).map do |id|
+          Restforce::Bulk::Result.new({job_id: job_id, batch_id: id, id: id})
         end
       end
 
       protected
 
       def results_parser_for(body)
-        body.is_a?(CSV::Table) ? Restforce::Bulk::Parser::Csv : Restforce::Bulk::Parser::Xml
+        body.is_a?(CSV::Table) ? Restforce::Bulk::Parser::Csv : Restforce::Bulk::Parser::Json
       end
     end
   end

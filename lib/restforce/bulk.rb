@@ -25,11 +25,13 @@ module Restforce
       autoload :Csv,    'restforce/bulk/builder/csv'
       autoload :ZipXml, 'restforce/bulk/builder/zip_xml'
       autoload :ZipCsv, 'restforce/bulk/builder/zip_csv'
+      autoload :Json,   'restforce/bulk/builder/json'
     end
 
     module Parser
-      autoload :Xml, 'restforce/bulk/parser/xml'
-      autoload :Csv, 'restforce/bulk/parser/csv'
+      autoload :Xml,  'restforce/bulk/parser/xml'
+      autoload :Csv,  'restforce/bulk/parser/csv'
+      autoload :Json, 'restforce/bulk/parser/json'
     end
 
     module Middleware
@@ -41,7 +43,8 @@ module Restforce
       csv: 'text/csv',
       xml: 'application/xml',
       zip_csv: 'zip/csv',
-      zip_xml: 'zip/xml'
+      zip_xml: 'zip/xml',
+      json: 'application/json'
     }
 
     def self.client
