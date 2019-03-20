@@ -8,7 +8,6 @@ module Restforce
           builder  = builder_class_for(content_type).new(operation)
 
           response = Restforce::Bulk.client.perform_request(:post, "job/#{job_id}/batch", builder.transform(data, operation, content_type), content_type)
-
           new(response.body)
         end
 
