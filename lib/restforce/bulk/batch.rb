@@ -8,7 +8,8 @@ module Restforce
           builder  = builder_class_for(content_type).new(operation)
 
           response = Restforce::Bulk.client.perform_request(:post, "job/#{job_id}/batch", builder.transform(data, operation, content_type), content_type)
-          new(response.body)
+          body = (content_type == :json ? response.body : response.body.batchInfo)
+          new(body, content_type)
         end
 
         def find(job_id, id)
@@ -20,10 +21,11 @@ module Restforce
         end
       end
 
-      attr_accessor :id, :job_id, :state, :created_date, :system_modstamp, :number_records_processed
+      attr_accessor :id, :job_id, :state, :created_date, :system_modstamp, :number_records_processed, :content_type
 
-      def initialize(attributes={})
+      def initialize(attributes={}, content_type=:json )
         assign_attributes(attributes)
+        @content_type = content_type
       end
 
       def queued?
@@ -48,23 +50,34 @@ module Restforce
 
       def refresh
         response = Restforce::Bulk.client.perform_request(:get, "job/#{job_id}/batch/#{id}")
-
-        assign_attributes(response.body)
+        body = (content_type == :json ? response.body : response.body.batchInfo)
+        assign_attributes(body)
       end
 
       def results
         response = Restforce::Bulk.client.perform_request(:get, "job/#{job_id}/batch/#{id}/result")
         parser   = results_parser_for(response.body).new
 
-        parser.results_on(response.body).map do |id|
-          Restforce::Bulk::Result.new({job_id: job_id, batch_id: id, id: id})
+        parser.results_on(response.body).map do |result|
+          if content_type == :json
+            Restforce::Bulk::Result.new({job_id: job_id, batch_id: id, id: result}, content_type)
+          else
+            Restforce::Bulk::Result.new({job_id: job_id, batch_id: id}.merge(result), content_type)
+          end
         end
       end
 
       protected
 
       def results_parser_for(body)
-        body.is_a?(CSV::Table) ? Restforce::Bulk::Parser::Csv : Restforce::Bulk::Parser::Json
+        case content_type
+        when :csv
+          Restforce::Bulk::Parser::Csv
+        when :json
+          Restforce::Bulk::Parser::Json
+        else
+          Restforce::Bulk::Parser::Xml
+        end
       end
     end
   end

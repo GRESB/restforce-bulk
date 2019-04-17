@@ -3,10 +3,11 @@ module Restforce
     class Result
       include Restforce::Bulk::Attributes
 
-      attr_accessor :id, :success, :created, :error, :job_id, :batch_id
+      attr_accessor :id, :success, :created, :error, :job_id, :batch_id, :content_type
 
-      def initialize(attributes={})
+      def initialize(attributes={}, content_type)
         assign_attributes(attributes)
+        @content_type = content_type
       end
 
       def content
@@ -19,10 +20,15 @@ module Restforce
       protected
 
       def results_parser_for(body)
-        body.is_a?(CSV::Table) ? Restforce::Bulk::Parser::Csv : Restforce::Bulk::Parser::Json
+        case content_type
+        when :csv
+          Restforce::Bulk::Parser::Csv
+        when :json
+          Restforce::Bulk::Parser::Json
+        else
+          Restforce::Bulk::Parser::Xml
+        end
       end
     end
   end
 end
-
-
