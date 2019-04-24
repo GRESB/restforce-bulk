@@ -21,7 +21,7 @@ module Restforce
         end
       end
 
-      attr_accessor :id, :job_id, :state, :created_date, :system_modstamp, :number_records_processed, :content_type
+      attr_accessor :id, :job_id, :state, :created_date, :system_modstamp, :number_records_processed, :number_records_failed, :state_message, :total_processing_time, :content_type
 
       def initialize(attributes={}, content_type=:json )
         assign_attributes(attributes)
